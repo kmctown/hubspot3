@@ -81,6 +81,7 @@ class DealsClient(BaseClient):
         offset: int = 0,
         extra_properties: Union[list, str] = None,
         limit: int = -1,
+        properties_with_history: list = None,
         **options
     ):
         """
@@ -115,17 +116,22 @@ class DealsClient(BaseClient):
                 properties += extra_properties
             if isinstance(extra_properties, str):
                 properties.append(extra_properties)
+        
+        params = {
+            "limit": query_limit,
+            "offset": offset,
+            "properties": properties,
+            "includeAssociations": True,
+        }
+        
+        if properties_with_history is not None:
+            params["propertiesWithHistory"] = properties_with_history
 
         while not finished:
             batch = self._call(
                 "deal/paged",
                 method="GET",
-                params={
-                    "limit": query_limit,
-                    "offset": offset,
-                    "properties": properties,
-                    "includeAssociations": True,
-                },
+                params=params,
                 doseq=True,
                 **options
             )
